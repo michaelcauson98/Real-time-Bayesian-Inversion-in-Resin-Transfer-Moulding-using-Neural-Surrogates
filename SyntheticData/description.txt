@@ -1,0 +1,14 @@
+Exp 1:
+RT only (first half + some later)
+RT: 
+
+Exp 2:
+Small circle and line (no RT)
+
+Exp 3:
+Larger circle and (first half) RT
+bg = 0.55, central = 0.77, RT = 0.93
+diam = 8cm, p_I = 100,000
+
+Exp 4:
+Two circles and (both-sided) RT

@@ -1,0 +1,11 @@
+__pycache__/
+Figures/
+GIFS/
+Matlab/
+NNs/
+NNs2/
+Misc/
+*.png
+*.mat
+GIF_creator.py
+GIF_generator.py

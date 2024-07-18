@@ -1,0 +1,8 @@
+Background:
+porosity: 0.6
+
+RT (top edge only):
+porosity: 0.93
+
+Central defect(s):
+centre: (0.15,0.15), diameter (80mm), porosity: 0.78
