@@ -10,8 +10,8 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap
 import scipy
 from matplotlib import cm
-import matplotlib.colors as mcolors
 
+# Nonlinear colormap for log-permeability
 class nlcmap(LinearSegmentedColormap):
     """A nonlinear colormap"""
     
@@ -19,7 +19,6 @@ class nlcmap(LinearSegmentedColormap):
     
     def __init__(self, cmap, levels):
         self.cmap = cmap
-        # @MRR: Need to add N for backend
         self.N = cmap.N
         self.monochrome = self.cmap.monochrome
         self.levels = np.asarray(levels, dtype='float64')
@@ -28,15 +27,58 @@ class nlcmap(LinearSegmentedColormap):
     
     #@MRR Need to add **kw for 'bytes'
     def __call__(self, xi, alpha=1.0, **kw):
-        """docstring for fname"""
-        # @MRR: Appears broken? 
-        # It appears something's wrong with the
-        # dimensionality of a calculation intermediate
-        #yi = stineman_interp(xi, self._x, self._y)
         yi = np.interp(xi, self._x, self._y)
         return self.cmap(yi, alpha)
 
 class PlotEKI:
+    
+    """
+    Description
+    -----------
+    PlotEKI class holds essential functions used to plot the EKI results. This
+    code will be written far more efficiently in future commits.
+
+    Parameters
+    ----------
+    posterior_ensemble : list
+        List of numpy.array elements corresponding to the posterior ensemble
+        approximations at each inversion time.
+    EKI : class
+        The EKI class (see EKI.py).
+    
+    Functions
+    -------
+    Public plot_permeability :
+        Takes an 85-length vector, K, and plots on the partition described in 
+        the paper. Also included are other arguments, e.g. min/max colorbar 
+        values, colormaps etc.
+    Public plot_sequential :
+        Sequentially plots the ensemble estimates at each inversion time. The 
+        code is quite convoluted (messy) but has been written so that it can plot: 
+        (i) log-permeability vs. permeability, (ii) permeability vs. permeability
+        and porosity, (iii) defect probability vs. no defect probability, (iv)
+        true permeability/porosity if available, (v) the moving boundary if 
+        available, (vi) circular defect outline of specified size/location.
+    Private _defect_probability :
+        Computes approximate defect probability, according to the definition in
+        the paper, for a given ensemble estimate.
+
+    Returns
+    -------
+    No returns
+
+    Examples
+    --------
+    >>> plotter = PlotEKI(posterior_ensemble_list, EKI_object)
+    >>> plotter.plot_sequential(permeability_only = 0,log_perm=1,
+                            sensor_locs=Exp.sensor_dict['3x3'],
+                            plot_prob = 1,defect_type="low",
+                            defect_tresholds=[3e-10,7e-10,0.5,0.7],
+                            images_available = 0, images = None,
+                            truth_available = 1, truth = EKI_object.u_true,
+                            front_available = 0, front = None,
+                            plot_circle=1,circle_centre=[0.1,0.1],radius=0.04)
+    """
     
     def __init__(self,posterior_ensemble,EKI):
         
@@ -266,7 +308,7 @@ class PlotEKI:
         if plot_prob:
             
             for i in range(columns - truth_available):
-                im5 = self.plot_permeability(self.defect_probability(i,defect_type,defect_tresholds),0,1,
+                im5 = self.plot_permeability(self._defect_probability(i,defect_type,defect_tresholds),0,1,
                                        sensor_locs=0,virtual=1,cbar = False,c_map=prob_map,rm_axis="False",plt_sensors=False,
                                        axis=axes[-1,i+truth_available])
             if plot_circle:
@@ -333,7 +375,7 @@ class PlotEKI:
         # fig.add_artist(line)
 
     
-    def defect_probability(self,t,def_type,defect_tresholds):
+    def _defect_probability(self,t,def_type,defect_tresholds):
         # Thresholds: [K_low,K_high,phi_low,phi_high]
         ensemble_t = self.posterior_ensemble[t]
         
