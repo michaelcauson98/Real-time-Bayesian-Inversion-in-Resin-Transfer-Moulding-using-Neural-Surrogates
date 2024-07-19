@@ -90,12 +90,12 @@ class EKI:
         
         self.u_true = u_true
         
-        assert p_I < self.Experiment.p_I[1], "p_I must be within the trained range"
-        assert p_I > self.Experiment.p_I[0], "p_I must be within the trained range"
+        assert p_I <= self.Experiment.p_I[1], "p_I must be within the trained range"
+        assert p_I >= self.Experiment.p_I[0], "p_I must be within the trained range"
         self.p_I = p_I
         
-        assert mu < self.Experiment.mu[1], "\mu must be within the trained range"
-        assert mu > self.Experiment.mu[0], "\mu must be within the trained range"
+        assert mu <= self.Experiment.mu[1], "\mu must be within the trained range"
+        assert mu >= self.Experiment.mu[0], "\mu must be within the trained range"
         self.mu = mu
         
         # Ensure list of observation times is consistent

@@ -160,7 +160,7 @@ class PlotEKI:
                         images_available = 0, images = None,
                         truth_available = 0, truth = 0,
                         front_available = 0, front = 0,
-                        plot_circle=0,circle_centre=[0.15,0.15],radius=0.04,rm_first_col=0):
+                        plot_circle=0,circle_centre=[0.15,0.15],radius=0.04):
         
         perm_map = "turbo"
         poro_map = "jet"
@@ -266,7 +266,7 @@ class PlotEKI:
         if plot_prob:
             
             for i in range(columns - truth_available):
-                im5 = self.plot_permeability(self.defect_probability(i,defect_type,defect_tresholds,rm_first_col),0,1,
+                im5 = self.plot_permeability(self.defect_probability(i,defect_type,defect_tresholds),0,1,
                                        sensor_locs=0,virtual=1,cbar = False,c_map=prob_map,rm_axis="False",plt_sensors=False,
                                        axis=axes[-1,i+truth_available])
             if plot_circle:
@@ -321,20 +321,19 @@ class PlotEKI:
             
         # line = plt.Line2D((0,1),(.4975,.4975), color="k", linewidth=2,linestyle="--")
         # fig.add_artist(line)
-        line = plt.Line2D((0,1),(.495,.495), color="k", linewidth=2,linestyle="--")
-        fig.add_artist(line)
-        line = plt.Line2D((0,1),(.825,.825), color="k", linewidth=2,linestyle="--")
-        fig.add_artist(line)
-        line = plt.Line2D((0,1),(.1675,.1675), color="k", linewidth=2,linestyle="--")
-        fig.add_artist(line)
+        # line = plt.Line2D((0,1),(.495,.495), color="k", linewidth=2,linestyle="--")
+        # fig.add_artist(line)
+        # line = plt.Line2D((0,1),(.825,.825), color="k", linewidth=2,linestyle="--")
+        # fig.add_artist(line)
+        # line = plt.Line2D((0,1),(.1675,.1675), color="k", linewidth=2,linestyle="--")
+        # fig.add_artist(line)
         # line = plt.Line2D((0,1),(.3925,.3925), color="k", linewidth=2,linestyle="--")
         # fig.add_artist(line)
         # line = plt.Line2D((0.11875,0.11875),(0,1), color="k", linewidth=2,linestyle="--")
-        fig.add_artist(line)
+        # fig.add_artist(line)
 
     
     def defect_probability(self,t,def_type,defect_tresholds):
-        
         # Thresholds: [K_low,K_high,phi_low,phi_high]
         ensemble_t = self.posterior_ensemble[t]
         
