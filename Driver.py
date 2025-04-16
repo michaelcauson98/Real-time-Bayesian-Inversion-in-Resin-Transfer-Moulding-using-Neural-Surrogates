@@ -52,9 +52,9 @@ Dat = Data(Exp,X,Y,filling_times)
 ####################     Neural network training    ###########################
 ###############################################################################
 
-# Initialise neural network and train (architecture: [172,1000,1624])
+# Initialise neural network and train (architecture: [172,1000,1000,1624])
 NN = NeuralNetwork(Data = Dat,
-                   architecture = [len(Dat.TrainX[0]),1000,len(Dat.TrainY[0])],
+                   architecture = [len(Dat.TrainX[0]),1000,1000,len(Dat.TrainY[0])],
                    activation = "Sigmoid",
                    epochs = 5000, 
                    learning_rate = 0.001,
@@ -209,9 +209,7 @@ plt.show()
 %timeit NN.F(Dat.DevelopX[0])
 
 # Set various inversion times
-all_times = list(range(1,15))
-five_times = [1,4,7,10,14]
-seven_times = [1,3,5,7,9,11,14]
+all_times = list(range(1,18))
 
 # Generate data for test row i
 i = 14
@@ -220,7 +218,7 @@ y_14 = Dat.ParameteriseY(Dat.TestY,"BWD")[i]
 
 # Create data
 data_obj_virt = Dat.generate_data(y_14,
-                                  sensor_inds = Exp.sensor_dict['All'],
+                                  sensor_inds = list(range(20)),
                                   sigma1 = 0.000,sigma2 = 0.005,
                                   surr_error = NN.surr_error)
 
