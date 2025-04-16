@@ -39,8 +39,8 @@ from PlotEKI import PlotEKI, nlcmap
 Exp = Experiment()
 
 # Read in data 
-# X has 172 columns (85 permeability values, 85 porosity values, 1 p_I, 1 \mu)
-# Y has 1624 coloumns (116 sensor locs with 14 observation times)
+# X has 61 columns (28 permeability values, 28 porosity values, 4 p_I, 1 \mu)
+# Y has 360 coloumns (20 sensor locs with 18 observation times)
 X, Y = read_txt(r"../GithubData3D\Inputs.txt"), read_txt(r"../GithubData3D\Outputs.txt")
 filling_times = read_txt(r"../GithubData3D\filling_times.txt")
 
@@ -211,9 +211,10 @@ plt.show()
 %timeit NN.F(Dat.DevelopX[0])
 
 # Set various inversion times
-all_times = list(range(1,15))
-five_times = [1,4,7,10,14]
-seven_times = [1,3,5,7,9,11,14]
+# all_times = list(range(1,15))
+# five_times = [1,4,7,10,14]
+# seven_times = [1,3,5,7,9,11,14]
+all_times = list(range(1,19))
 
 # Generate data for test row i
 i = 14
@@ -221,8 +222,12 @@ x_14 = Dat.UnitTransformX(Dat.TestX, "BWD")[i]
 y_14 = Dat.ParameteriseY(Dat.TestY,"BWD")[i]
 
 # Create data
+# data_obj_virt = Dat.generate_data(y_14,
+#                                   sensor_inds = Exp.sensor_dict['All'],
+#                                   sigma1 = 0.000,sigma2 = 0.005,
+#                                   surr_error = NN.surr_error)
 data_obj_virt = Dat.generate_data(y_14,
-                                  sensor_inds = Exp.sensor_dict['All'],
+                                  sensor_inds = list(range(20)),
                                   sigma1 = 0.000,sigma2 = 0.005,
                                   surr_error = NN.surr_error)
 
