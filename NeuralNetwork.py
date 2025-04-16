@@ -133,11 +133,17 @@ class NeuralNetwork:
         train_x, train_y = torch.tensor(self.Data.TrainX).float(), torch.tensor(self.Data.TrainY).float()
         develop_x, develop_y = torch.tensor(self.Data.DevelopX).float(), torch.tensor(self.Data.DevelopY).float()
         
-        # Move data to GPU
-        model = self.model.to('cuda:0')
-        train_x, train_y = train_x.to('cuda:0'), train_y.to('cuda:0')
-        develop_x, develop_y = develop_x.to('cuda:0'), develop_y.to('cuda:0')
+        # # Move data to GPU
+        # model = self.model.to('cuda:0')
+        # train_x, train_y = train_x.to('cuda:0'), train_y.to('cuda:0')
+        # develop_x, develop_y = develop_x.to('cuda:0'), develop_y.to('cuda:0')
         
+        # Move data to GPU
+        where = 'cpu' #change to cuda:0 for GPU training
+        model = self.model.to(where)
+        train_x, train_y = train_x.to(where), train_y.to(where)
+        develop_x, develop_y = develop_x.to(where), develop_y.to(where)
+       
         # Train the model
         loss_fn = nn.MSELoss()
         optimizer = optim.Adam(model.parameters(), lr=self.lr)
@@ -285,15 +291,38 @@ class NeuralNetwork:
         preds_v = np.diagonal(self.surr_cov)
         
         # Plot n examples of surrogate on validation set
+        # if self.plotting:
+        #     k = int(116*14)
+        #     for i in range(n):
+        #         plt.plot(list(range(k)),preds_m[i,:k],color="black")
+        #         plt.plot(list(range(k)),DevelopY[i,:k],color="red")
+        #         plt.fill_between(list(range(k)),preds_m[i,:k]-2*np.sqrt(preds_v[:k]),preds_m[i,:k]+2*np.sqrt(preds_v[:k]))
+        #         plt.ylim([-10_000,110_000])
+        #         plt.show()
+        
+        # Plot n examples of surrogate on validation set
         if self.plotting:
-            k = int(116*14)
+            # k is the number of sensor*number of observations (1400)
+            k = preds_m.shape[1]
+            # Total number of sensors
+            num_sensor = 20
+            # X-axis will always be in range (0 to k/20=70)
+            x_vals = list(range(k // num_sensor))
+            
             for i in range(n):
-                plt.plot(list(range(k)),preds_m[i,:k],color="black")
-                plt.plot(list(range(k)),DevelopY[i,:k],color="red")
-                plt.fill_between(list(range(k)),preds_m[i,:k]-2*np.sqrt(preds_v[:k]),preds_m[i,:k]+2*np.sqrt(preds_v[:k]))
+                for sensor in range(num_sensor):
+                    # Take every 20th data starting from sensor index
+                    y_preds = preds_m[i, sensor::num_sensor]
+                    y_actual = DevelopY[i, sensor::num_sensor]
+                    # Plot predictions (black) and actual values (red)
+                    plt.plot(x_vals, y_preds, color="black")  # Predictions in black
+                    plt.plot(x_vals, y_actual, color="red")  # Actual values in red
+                #plt.plot(list(range(k)),preds_m[i,:k],color="black")
+                #plt.plot(list(range(k)),DevelopY[i,:k],color="red")
+                #plt.fill_between(list(range(k)),preds_m[i,:k]-2*np.sqrt(preds_v[:k]),preds_m[i,:k]+2*np.sqrt(preds_v[:k]))
                 plt.ylim([-10_000,110_000])
                 plt.show()
-        
+                
         # Relative errors in the develop set
         rel_errors = [np.linalg.norm(DevelopY[i]-preds_m[i])/np.linalg.norm(DevelopY[i]) for i in range(len(DevelopY))]
         

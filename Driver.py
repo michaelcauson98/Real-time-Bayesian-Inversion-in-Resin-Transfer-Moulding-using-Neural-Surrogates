@@ -52,30 +52,32 @@ Dat = Data(Exp,X,Y,filling_times)
 ####################     Neural network training    ###########################
 ###############################################################################
 
-# Initialise neural network and train (architecture: [172,1000,1624])
-NN = NeuralNetwork(Data = Dat,
-                   architecture = [len(Dat.TrainX[0]),1000,len(Dat.TrainY[0])],
-                   activation = "Sigmoid",
-                   epochs = 5000, 
-                   learning_rate = 0.001,
-                   batch_size = 128,
-                   plotting = 1)
-NN.train_nn()
-NN.assess_surrogate(n = 10)
+# Initialise neural network and train (architecture: [61,200,200,200,360])
+# NN = NeuralNetwork(Data = Dat,
+#                    architecture = [len(Dat.TrainX[0]),200,200,200,len(Dat.TrainY[0])],
+#                    activation = "Sigmoid",
+#                    epochs = 5000, 
+#                    learning_rate = 0.001,
+#                    batch_size = 64,
+#                    plotting = 1)
+# NN.train_nn()
+# NN.assess_surrogate(n = 10)
+
+# torch.save(NN.model.state_dict(), 'NNs/myfirstNN.pth')
+# NN.upload_nn('NNs/myfirstNN.pth')
 
 ###############################################################################
 ####################     Visual surrogate error    ############################
 ###############################################################################
 
-# Uncomment to upload saved NN model
-# NN = NeuralNetwork(Data = Dat,
-#                    architecture = [len(Dat.TrainX[0]),1000,len(Dat.TrainY[0])],
-#                    activation = "Sigmoid",
-#                    epochs = 1000, 
-#                    learning_rate = 0.001,
-#                    batch_size = 128,
-#                    plotting = 1)
-# NN.upload_nn(r"path_to_NN.pth") # Upload pre-trained model
+NN = NeuralNetwork(Data = Dat,
+                   architecture = [len(Dat.TrainX[0]),200,200,200,len(Dat.TrainY[0])],
+                   activation = "Sigmoid",
+                   epochs = 5000, 
+                   learning_rate = 0.001,
+                   batch_size = 64,
+                   plotting = 1)
+NN.upload_nn(r"NNs/myfirstNN.pth") # Upload pre-trained model
 
 plt.figure(figsize=(14,4))
 plt.subplot(1,2,1)
