@@ -59,16 +59,16 @@ class Experiment:
     """
     
     def __init__(self,
-                 Lx = 0.3, Ly = 0.3,
-                 p_I = [90_000, 110_000], p_O = 0,
-                 darcy_thickness = 0.001, mu = [0.09, 0.11], 
-                 observation_times = [1,3,5,7,10,15,20,25,30,35,40,45,50,55],
-                 min_perm_central = 2.0 * 10**(-10), max_perm_central = 7 * 10**(-10),
-                 min_perm_RT = 2.0 * 10**(-10), max_perm_RT = 500 * 10**(-10),
-                 min_poro_central = 0.4, max_poro_central = 0.85,
-                 min_poro_RT = 0.4, max_poro_RT = 0.9882,
-                 Nx = 64, M = 9, M_RT = 2,
-                 sigma1 = 0.00, sigma2 = 0.01):
+                 Lx=0.3, Ly=0.3,
+                 p_I=[90_000, 110_000], inlets=4, p_O=0,
+                 darcy_thickness=0.001, mu=[0.09, 0.11], 
+                 observation_times=[1,3,5,7,10,15,20,25,30,35,40,45,50,55],
+                 min_perm_central=2.0 * 10**(-10), max_perm_central=7 * 10**(-10),
+                 min_perm_RT=2.0 * 10**(-10), max_perm_RT=500 * 10**(-10),
+                 min_poro_central=0.4, max_poro_central=0.85,
+                 min_poro_RT=0.4, max_poro_RT=0.9882,
+                 Nx=64, M=16, M_RT=12,
+                 sigma1=0.00, sigma2=0.01):
         
         # Various sets
         assert Lx > 0, "Lx must be greater than 0"
@@ -78,8 +78,10 @@ class Experiment:
         
         assert len(p_I) == 2, "p_I must have a min and max value"
         assert p_I[0] > p_O, "p_I must be greater than p_O"
+        assert inlets > 0, "inlets must be greater than 0"
         self.p_I = p_I
         self.p_O = p_O
+        self.inlets = inlets
         
         self.darcy_thickness = darcy_thickness
         
@@ -121,18 +123,18 @@ class Experiment:
         self.sigma2 = sigma2
         
         # Max and min vectors (used in other classes)
-        self.param_min = np.concatenate( (np.ones(self.M**2)*self.min_perm_central,
-                                          np.ones(self.M_RT*2)*self.min_perm_RT,
-                                          np.ones(self.M**2)*self.min_poro_central,
-                                          np.ones(self.M_RT*2)*self.min_poro_RT,
-                                          np.array([self.p_I[0]]),
+        self.param_min = np.concatenate( (np.ones(self.M)*self.min_perm_central,
+                                          np.ones(self.M_RT)*self.min_perm_RT,
+                                          np.ones(self.M)*self.min_poro_central,
+                                          np.ones(self.M_RT)*self.min_poro_RT,
+                                          np.array(self.inlets*[self.p_I[0]]),
                                           np.array([self.mu[0]])
                                           ) )
-        self.param_max = np.concatenate( (np.ones(self.M**2)*self.max_perm_central,
-                                          np.ones(self.M_RT*2)*self.max_perm_RT,
-                                          np.ones(self.M**2)*self.max_poro_central,
-                                          np.ones(self.M_RT*2)*self.max_poro_RT,
-                                          np.array([self.p_I[1]]),
+        self.param_max = np.concatenate( (np.ones(self.M)*self.max_perm_central,
+                                          np.ones(self.M_RT)*self.max_perm_RT,
+                                          np.ones(self.M)*self.max_poro_central,
+                                          np.ones(self.M_RT)*self.max_poro_RT,
+                                          np.array(self.inlets*[self.p_I[1]]),
                                           np.array([self.mu[1]])
                                           ) )
         
