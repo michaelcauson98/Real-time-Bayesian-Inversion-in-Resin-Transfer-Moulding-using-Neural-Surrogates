@@ -80,6 +80,7 @@ class EKI:
         self.Experiment = Experiment
         self.Data = Data
         self.NN = NeuralNetwork
+        self.device = self.NN.device
         
         # EKI parameters
         assert n_ensemble > 0, "Number of ensemble members must be positive"
@@ -90,8 +91,8 @@ class EKI:
         
         self.u_true = u_true
         
-        assert p_I <= self.Experiment.p_I[1], "p_I must be within the trained range"
-        assert p_I >= self.Experiment.p_I[0], "p_I must be within the trained range"
+        assert np.all(p_I <= self.Experiment.p_I[1]), "p_I must be within the trained range"
+        assert np.all(p_I >= self.Experiment.p_I[0]), "p_I must be within the trained range"
         self.p_I = p_I
         
         assert mu <= self.Experiment.mu[1], "\mu must be within the trained range"
@@ -118,29 +119,29 @@ class EKI:
         
         
         # Convert useful objects to torch tensors
-        self.param_max = torch.tensor(self.Experiment.param_max).float().cuda()
-        self.param_min = torch.tensor(self.Experiment.param_min).float().cuda()
-        self.param_max_no_press = torch.tensor(self.Experiment.param_max[:len(self.Experiment.param_max)-2]).float().cuda()
-        self.param_min_no_press = torch.tensor(self.Experiment.param_min[:len(self.Experiment.param_min)-2]).float().cuda()
-        self._logX_means = torch.tensor(self.Data._logX_means[:len(self.Data._logX_means)-2]).float().cuda()
-        self._logX_stds = torch.tensor(self.Data._logX_stds[:len(self.Data._logX_stds)-2]).float().cuda()
-        self._logY_means = torch.tensor(self.Data._logY_means).float().cuda()
-        self._logY_stds = torch.tensor(self.Data._logY_stds).float().cuda()
-        self.model = self.NN.model.cuda()
-        self.pressures = torch.ones((self.n_ensemble,1)).float().cuda()*self.p_I
-        self.viscosities = torch.ones((self.n_ensemble,1)).float().cuda()*self.mu
+        self.param_max = torch.tensor(self.Experiment.param_max).float().to(self.device)
+        self.param_min = torch.tensor(self.Experiment.param_min).float().to(self.device)
+        self.param_max_no_press = torch.tensor(self.Experiment.param_max[:len(self.Experiment.param_max)-5]).float().to(self.device)
+        self.param_min_no_press = torch.tensor(self.Experiment.param_min[:len(self.Experiment.param_min)-5]).float().to(self.device)
+        self._logX_means = torch.tensor(self.Data._logX_means[:len(self.Data._logX_means)-5]).float().to(self.device)
+        self._logX_stds = torch.tensor(self.Data._logX_stds[:len(self.Data._logX_stds)-5]).float().to(self.device)
+        self._logY_means = torch.tensor(self.Data._logY_means).float().to(self.device)
+        self._logY_stds = torch.tensor(self.Data._logY_stds).float().to(self.device)
+        self.model = self.NN.model.to(self.device)
+        self.pressures = (torch.ones((self.n_ensemble,4))*self.p_I).float().to(self.device)
+        self.viscosities = torch.ones((self.n_ensemble,1)).float().to(self.device)*self.mu
     
         
         # Add/update data provided
-        self.press = torch.tensor(Data_obj[0]).float().cuda()
-        self.data = torch.tensor(Data_obj[1]).float().cuda()
-        self.gamma = torch.tensor(Data_obj[2]).float().cuda()
+        self.press = torch.tensor(Data_obj[0]).float().to(self.device)
+        self.data = torch.tensor(Data_obj[1]).float().to(self.device)
+        self.gamma = torch.tensor(Data_obj[2]).float().to(self.device)
         self.all_sensor_inds = Data_obj[3]
         surr_cov = self.NN.surr_cov[np.ix_(Data_obj[3],Data_obj[3])]
         gamma_infl = np.diag(Data_obj[2]) + surr_cov
         Gamma_minus_half = scipy.linalg.sqrtm(scipy.linalg.inv(gamma_infl))
-        self.surr_cov = torch.tensor(surr_cov).float().cuda()
-        self.Gamma_minus_half = torch.tensor(Gamma_minus_half).float().cuda()
+        self.surr_cov = torch.tensor(surr_cov).float().to(self.device)
+        self.Gamma_minus_half = torch.tensor(Gamma_minus_half).float().to(self.device)
     
     
     # X -> X_new = log( (b-X)/(X-a) ) -> normalised X_new (EKI parameterisation)
@@ -185,24 +186,24 @@ class EKI:
             return U_prev.clone().detach()
         
         # K central
-        U_1 = np.random.uniform(self.Experiment.min_perm_central+0.005e-10,
-                                self.Experiment.max_perm_central-0.005e-10,
-                                (self.n_ensemble,self.Experiment.M**2))
+        U_1 = np.random.uniform(self.Experiment.min_perm_central+0.005e-11,
+                                self.Experiment.max_perm_central-0.005e-11,
+                                (self.n_ensemble,self.Experiment.M))
         # K RT
-        U_2 = np.random.uniform(self.Experiment.min_perm_central+0.005e-10,
-                                self.Experiment.max_perm_RT-0.005e-10,
-                                (self.n_ensemble,self.Experiment.M_RT*2))
+        U_2 = np.random.uniform(self.Experiment.min_perm_RT+0.005e-11,
+                                self.Experiment.max_perm_RT-0.005e-8,
+                                (self.n_ensemble,self.Experiment.M_RT))
         
         if not ensemble_dependence:
         
             # Phi central
             U_3 = np.random.uniform(self.Experiment.min_poro_central+0.0005,
                                     self.Experiment.max_poro_central-0.0005,
-                                    (self.n_ensemble,self.Experiment.M**2))
+                                    (self.n_ensemble,self.Experiment.M))
             # Phi RT
             U_4 = np.random.uniform(self.Experiment.min_poro_central+0.0005,
                                     self.Experiment.max_poro_RT-0.0005,
-                                    (self.n_ensemble,self.Experiment.M_RT*2))
+                                    (self.n_ensemble,self.Experiment.M_RT))
         else:
             
             # Phi central
@@ -213,7 +214,7 @@ class EKI:
                               self.Experiment.max_poro_RT-0.0005)
 
 
-        U = torch.tensor(np.hstack( (U_1,U_2,U_3,U_4) )).float().cuda()
+        U = torch.tensor(np.hstack( (U_1,U_2,U_3,U_4) )).float().to(self.device)
         U = self._ParameteriseXTensor(U,"FWD").T # Parameterise and tensorise
         return U
      
@@ -222,7 +223,7 @@ class EKI:
         
         # For FWD map, un-parameterise ensemble and move to [0,1]^170 (where model is trained).
         U = self._ParameteriseXTensor(U.T, "BWD")
-        U = torch.hstack( (U,self.pressures.cuda(),self.viscosities.cuda()) )
+        U = torch.hstack( (U,self.pressures.to(self.device),self.viscosities.to(self.device)) )
         U = self._UnitTransformXTensor(U, "FWD")
                 
         with torch.no_grad():
@@ -274,7 +275,7 @@ class EKI:
             Gu = Gu.T
         
             # Repeat the data into N_ensemble columns
-            data_mat = torch.tile(data,(self.n_ensemble,1)).T.cuda()
+            data_mat = torch.tile(data,(self.n_ensemble,1)).T.to(self.device)
             
             # Calculate data misfit (scaled by Gamma inflated)
             Dat_Misfit = torch.matmul(Gamma_minus_half, data_mat - Gu)
@@ -297,13 +298,15 @@ class EKI:
             U_mean = torch.mean(U,axis=1)
             U_Recentered = U - U_mean[:,np.newaxis]
             
+            
             # Covariance matrices
             C_GG = 1/(self.n_ensemble - 1) * torch.matmul(Dat_Misfit_Recentered, Dat_Misfit_Recentered.T)
             C_uG = 1/(self.n_ensemble - 1) * torch.matmul(U_Recentered, Dat_Misfit_Recentered.T)
             
+            
             # Noise perturbation and covariance update
-            RHS = Dat_Misfit + torch.sqrt(alpha) * torch.normal(0,1,(M,self.n_ensemble)).cuda()
-            U = U - torch.matmul(C_uG, torch.linalg.solve(C_GG + alpha * torch.eye(M).cuda() , RHS))
+            RHS = Dat_Misfit + torch.sqrt(alpha) * torch.normal(0,1,(M,self.n_ensemble)).to(self.device)
+            U = U - torch.matmul(C_uG, torch.linalg.solve(C_GG + alpha * torch.eye(M).to(self.device) , RHS))
 
             t_vec.append(t_vec[iterate] + 1/alpha)
             ensemble_iter.append(U)
@@ -370,7 +373,7 @@ class EKI:
         # Plot u_true if known (i.e. if virtual experiment)
         if self.u_true is not None:
             plt.scatter(list(range(1,halfway+1)),np.log(self.u_true[:halfway]),s=14,color="red")
-        plt.ylim([-22.5,np.log(self.Experiment.max_perm_RT)])
+        plt.ylim([np.log(self.Experiment.min_perm_central),np.log(self.Experiment.max_perm_RT)])
         plt.xticks(rotation = 90)
         
         # Posterior boxplot of \phi
