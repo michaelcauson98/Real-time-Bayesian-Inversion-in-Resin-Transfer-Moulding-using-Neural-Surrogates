@@ -41,8 +41,8 @@ Exp = Experiment()
 # Read in data 
 # X has 172 columns (85 permeability values, 85 porosity values, 1 p_I, 1 \mu)
 # Y has 1624 coloumns (116 sensor locs with 14 observation times)
-X, Y = read_txt(r"Data\X_9x9.txt"), read_txt(r"Data\Y_9x9.txt")
-filling_times = read_txt(r"Data\filling_times.txt")
+X, Y = read_txt(r"../GithubData3D\Inputs.txt"), read_txt(r"../GithubData3D\Outputs.txt")
+filling_times = read_txt(r"../GithubData3D\filling_times.txt")
 
 # Data object holds data and useful data-related functions
 Dat = Data(Exp,X,Y,filling_times)

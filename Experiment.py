@@ -59,31 +59,21 @@ class Experiment:
     """
     
     def __init__(self,
-                 Lx=0.3, Ly=0.3,
-                 p_I=[90_000, 110_000], inlets=4, p_O=0,
-                 darcy_thickness=0.001, mu=[0.09, 0.11], 
-                 observation_times=[1,3,5,7,10,15,20,25,30,35,40,45,50,55],
-                 min_perm_central=2.0 * 10**(-10), max_perm_central=7 * 10**(-10),
-                 min_perm_RT=2.0 * 10**(-10), max_perm_RT=500 * 10**(-10),
-                 min_poro_central=0.4, max_poro_central=0.85,
-                 min_poro_RT=0.4, max_poro_RT=0.9882,
-                 Nx=64, M=16, M_RT=12,
-                 sigma1=0.00, sigma2=0.01):
+                 p_I = [90_000, 110_000], inlets=4, mu = [0.09, 0.11], 
+                 observation_times = np.arange(0, 691, 10),
+                 min_perm_central = 0.38 * 10**(-10), max_perm_central = 1.18 * 10**(-10),
+                 min_perm_RT = 2.0 * 10**(-10), max_perm_RT = 500.0 * 10**(-10),
+                 min_poro_central = 0.47, max_poro_central = 0.57,
+                 min_poro_RT = 0.47, max_poro_RT = 0.98,
+                 M = 12, # number of central zones
+                 M_RT = 16, # number of RT inlets
+                 sigma1 = 0.00, sigma2 = 0.01):
         
-        # Various sets
-        assert Lx > 0, "Lx must be greater than 0"
-        assert Ly > 0, "Ly must be greater than 0"
-        self.Lx = Lx
-        self.Ly = Ly
         
         assert len(p_I) == 2, "p_I must have a min and max value"
-        assert p_I[0] > p_O, "p_I must be greater than p_O"
         assert inlets > 0, "inlets must be greater than 0"
         self.p_I = p_I
-        self.p_O = p_O
         self.inlets = inlets
-        
-        self.darcy_thickness = darcy_thickness
         
         assert len(mu) == 2, "\mu must have a min and max value"
         self.mu = mu
@@ -106,9 +96,6 @@ class Experiment:
         assert min_poro_RT < max_poro_RT, "Max \phi must be greater than min \phi"
         self.min_poro_RT = min_poro_RT
         self.max_poro_RT = max_poro_RT
-        
-        assert Nx > 0, "Nx must be positive"
-        self.Nx = Nx
         
         assert M > 0, "M must be positive"
         self.M = M
@@ -142,8 +129,8 @@ class Experiment:
         
 
         # Import sensor locations
-        self.all_sensor_locs = io.loadmat('Data\sensor_locs_9x9.mat')['all_sensor_locs']
-        self.all_sensor_locs_mesh = io.loadmat('Data\sensor_locs_mesh_9x9.mat')['all_sensor_locs_mesh']
+        self.all_sensor_locs = io.loadmat('../GithubData3D\sensor_locs_9x9.mat')['all_sensor_locs']
+        self.all_sensor_locs_mesh = io.loadmat('../GithubData3D\sensor_locs_mesh_9x9.mat')['all_sensor_locs_mesh']
         self.exp_sensor_locs = self.all_sensor_locs[0:23]
         self.exp_sensor_locs_mesh = self.all_sensor_locs_mesh[0:23]
         self.sensors_per_time = len(self.all_sensor_locs)
