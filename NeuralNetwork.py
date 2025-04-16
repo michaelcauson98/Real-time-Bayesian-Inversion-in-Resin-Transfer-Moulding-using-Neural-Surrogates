@@ -285,13 +285,33 @@ class NeuralNetwork:
         preds_m = self.F(self.Data.DevelopX)
         preds_v = np.diagonal(self.surr_cov)
         
+        # # Plot n examples of surrogate on validation set
+        # if self.plotting:
+        #     k = len(DevelopY[0])
+        #     for i in range(n):
+        #         plt.plot(list(range(k)),preds_m[i],color="black")
+        #         plt.plot(list(range(k)),DevelopY[i],color="red")
+        #         plt.fill_between(list(range(k)),preds_m[i]-2*np.sqrt(preds_v[:k]),preds_m[i]+2*np.sqrt(preds_v))
+        #         plt.ylim([-10_000,110_000])
+        #         plt.show()
+        
         # Plot n examples of surrogate on validation set
         if self.plotting:
+            # k is the number of sensor*number of observations (1400)
             k = len(DevelopY[0])
+            # Total number of sensors
+            num_sensor = 20
+            # X-axis will always be in range (0 to k/20=70)
+            x_vals = list(range(k // num_sensor))
+            
             for i in range(n):
-                plt.plot(list(range(k)),preds_m[i],color="black")
-                plt.plot(list(range(k)),DevelopY[i],color="red")
-                plt.fill_between(list(range(k)),preds_m[i]-2*np.sqrt(preds_v[:k]),preds_m[i]+2*np.sqrt(preds_v))
+                for sensor in range(num_sensor):
+                    # Take every 20th data starting from sensor index
+                    y_preds = preds_m[i, sensor::num_sensor]
+                    y_actual = DevelopY[i, sensor::num_sensor]
+                    # Plot predictions (black) and actual values (red)
+                    plt.plot(x_vals, y_preds, color="black")  # Predictions in black
+                    plt.plot(x_vals, y_actual, color="red")  # Actual values in red
                 plt.ylim([-10_000,110_000])
                 plt.show()
         

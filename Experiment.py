@@ -60,7 +60,7 @@ class Experiment:
     
     def __init__(self,
                  p_I = [90_000, 110_000], inlets=4, mu = [0.09, 0.11], 
-                 observation_times = np.range(18),
+                 observation_times = [],
                  min_perm_central = 0.38 * 10**(-10), max_perm_central = 1.18 * 10**(-10),
                  min_perm_RT = 2.0 * 10**(-10), max_perm_RT = 500.0 * 10**(-10),
                  min_poro_central = 0.47, max_poro_central = 0.57,
