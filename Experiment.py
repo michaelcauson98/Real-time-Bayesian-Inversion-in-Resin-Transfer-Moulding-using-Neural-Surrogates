@@ -61,12 +61,12 @@ class Experiment:
     def __init__(self,
                  p_I = [90_000, 110_000], inlets=4, mu = [0.09, 0.11], 
                  observation_times = [],
-                 min_perm_central = 0.38 * 10**(-10), max_perm_central = 1.18 * 10**(-10),
-                 min_perm_RT = 2.0 * 10**(-10), max_perm_RT = 500.0 * 10**(-10),
-                 min_poro_central = 0.47, max_poro_central = 0.57,
-                 min_poro_RT = 0.47, max_poro_RT = 0.98,
-                 M = 12, # number of central zones
-                 M_RT = 16, # number of RT inlets
+                 min_perm_central = 0.5 * 10**(-10), max_perm_central = 8.0 * 10**(-10),
+                 min_perm_RT = 10.0 * 10**(-10), max_perm_RT = 400.0 * 10**(-10),
+                 min_poro_central = 0.5, max_poro_central = 0.7,
+                 min_poro_RT = 0.95, max_poro_RT = 0.98,
+                 M = 17, # number of central zones
+                 M_RT = 32, # number of RT zones
                  sigma1 = 0.00, sigma2 = 0.01):
         
         
@@ -113,14 +113,14 @@ class Experiment:
         self.param_min = np.concatenate( (np.ones(self.M)*self.min_perm_central,
                                           np.ones(self.M_RT)*self.min_perm_RT,
                                           np.ones(self.M)*self.min_poro_central,
-                                          np.ones(self.M_RT)*self.min_poro_RT,
+                                          # np.ones(self.M_RT)*self.min_poro_RT,
                                           np.array(self.inlets*[self.p_I[0]]),
                                           np.array([self.mu[0]])
                                           ) )
         self.param_max = np.concatenate( (np.ones(self.M)*self.max_perm_central,
                                           np.ones(self.M_RT)*self.max_perm_RT,
                                           np.ones(self.M)*self.max_poro_central,
-                                          np.ones(self.M_RT)*self.max_poro_RT,
+                                          # np.ones(self.M_RT)*self.max_poro_RT,
                                           np.array(self.inlets*[self.p_I[1]]),
                                           np.array([self.mu[1]])
                                           ) )

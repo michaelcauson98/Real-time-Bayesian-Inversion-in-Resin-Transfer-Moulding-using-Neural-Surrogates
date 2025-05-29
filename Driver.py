@@ -39,11 +39,11 @@ from PlotEKI import PlotEKI, nlcmap
 Exp = Experiment()
 
 # Read in data 
-# X has 172 columns (85 permeability values, 85 porosity values, 1 p_I, 1 \mu)
-# Y has 1624 coloumns (116 sensor locs with 14 observation times)
-X, Y = read_txt(r"../GithubData3D\Inputs.txt"), read_txt(r"../GithubData3D\Outputs.txt")
-filling_times = read_txt(r"../GithubData3D\filling_times.txt")
-
+# X has 71 columns (49 permeability values, 17 porosity values, 4 p_I, 1 \mu)
+# Y has 300 coloumns (20 sensor locs with 15 observation times)
+X, Y = read_txt(r"Data\Inputs.txt"), read_txt(r"Data\Outputs.txt")
+# X, Y = read_txt(r"Data\Inputs_surrogate_1.txt"), read_txt(r"Data\Outputs_surrogate_1.txt")
+filling_times = read_txt(r"Data\filling_times.txt")
 # Data object holds data and useful data-related functions
 Dat = Data(Exp,X,Y,filling_times)
 
