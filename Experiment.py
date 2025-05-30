@@ -79,7 +79,7 @@ class Experiment:
         self.mu = mu
     
         self.observation_times = observation_times
-        self.times = 18
+        self.times = 15
         
         assert min_perm_central < max_perm_central, "Max K must be greater than min K"
         self.min_perm_central = min_perm_central
@@ -129,10 +129,10 @@ class Experiment:
         
 
         # Import sensor locations
-        self.all_sensor_locs = io.loadmat('../GithubData3D\sensor_locs_9x9.mat')['all_sensor_locs']
-        self.all_sensor_locs_mesh = io.loadmat('../GithubData3D\sensor_locs_mesh_9x9.mat')['all_sensor_locs_mesh']
-        self.exp_sensor_locs = self.all_sensor_locs[0:23]
-        self.exp_sensor_locs_mesh = self.all_sensor_locs_mesh[0:23]
+        # self.all_sensor_locs = io.loadmat('../GithubData3D\sensor_locs_9x9.mat')['all_sensor_locs']
+        # self.all_sensor_locs_mesh = io.loadmat('../GithubData3D\sensor_locs_mesh_9x9.mat')['all_sensor_locs_mesh']
+        # self.exp_sensor_locs = self.all_sensor_locs[0:23]
+        # self.exp_sensor_locs_mesh = self.all_sensor_locs_mesh[0:23]
         # self.sensors_per_time = len(self.all_sensor_locs)
         self.sensors_per_time = 20
         self.total_sensors = self.sensors_per_time*self.times

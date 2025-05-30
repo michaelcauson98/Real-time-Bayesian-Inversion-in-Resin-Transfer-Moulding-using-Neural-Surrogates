@@ -206,10 +206,11 @@ plt.show()
 ###############################################################################
 
 # Test surrogate evaluation time
-%timeit NN.F(Dat.DevelopX[0])
+# %timeit NN.F(Dat.DevelopX[0])
 
 # Set various inversion times
-all_times = list(range(1,19))
+number_of_obs_time = 15
+all_times = list(range(1,number_of_obs_time+1))
 
 # Generate data for test row i
 i = 5
