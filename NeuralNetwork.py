@@ -99,7 +99,7 @@ class NeuralNetwork:
         self.surr_cov = "Training required first"
         
         # Early stopping parameters
-        self.patience = 50
+        self.patience = 100
         self.min_delta = 0.00
         self.counter = 0
         self.min_validation_loss = float('inf')
@@ -275,7 +275,45 @@ class NeuralNetwork:
         return self.Data.ParameteriseY(y_pred.cpu().numpy(),"BWD")
 
     
-    # Assess quality of surrogate
+    # Assess the quality of surrogate with training data
+    
+    def assess_training (self,n):
+        
+        assert self.model_trained, "Neural network not yet trained" 
+        
+        # Form training data set
+        TrainY = self.Data.ParameteriseY(self.Data.TrainY,"BWD")
+        preds_m = self.F(self.Data.TrainX)
+        
+        # Plot n examples of surrogate on validation set
+        if self.plotting:
+            # k is the number of sensor*number of observations
+            k = len(TrainY[0])
+            # Total number of sensors
+            num_sensor = 20
+            # X-axis will always be in range (0 to k/20=70)
+            x_vals = list(range(k // num_sensor))
+            
+            for i in range(n):
+                for sensor in range(num_sensor):
+                    # Take every 20th data starting from sensor index
+                    y_preds = preds_m[i, sensor::num_sensor]
+                    y_actual = TrainY[i, sensor::num_sensor]
+                    # Plot predictions (black) and actual values (red)
+                    plt.plot(x_vals, y_preds, color="black")  # Predictions in black
+                    plt.plot(x_vals, y_actual, color="red")  # Actual values in red
+                plt.ylim([-10_000,110_000])
+                plt.show()        
+
+        # Relative errors in the develop set
+        rel_errors = [np.linalg.norm(TrainY[i]-preds_m[i])/np.linalg.norm(TrainY[i]) for i in range(len(TrainY))]
+        # Average/std of relative errors
+        print("Average relative error: " + str(np.mean(rel_errors)))
+        return
+    
+    
+    
+    # Assess quality of surrogate with develop data
     def assess_surrogate(self,n):
         
         assert self.model_trained, "Neural network not yet trained" 
@@ -297,7 +335,7 @@ class NeuralNetwork:
         
         # Plot n examples of surrogate on validation set
         if self.plotting:
-            # k is the number of sensor*number of observations (1400)
+            # k is the number of sensor*number of observations
             k = len(DevelopY[0])
             # Total number of sensors
             num_sensor = 20

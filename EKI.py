@@ -147,6 +147,9 @@ class EKI:
     # X -> X_new = log( (b-X)/(X-a) ) -> normalised X_new (EKI parameterisation)
     def _ParameteriseXTensor(self,data,direction):
         if direction == "FWD":
+            print(data.shape)
+            print(self.param_min_no_press.shape)
+            print(self.param_max_no_press.shape)
             logdata = torch.log( (self.param_max_no_press-data)/(data-self.param_min_no_press) )
             return (logdata - self._logX_means)/self._logX_stds
         else:
@@ -190,9 +193,14 @@ class EKI:
                                 self.Experiment.max_perm_central-0.005e-11,
                                 (self.n_ensemble,self.Experiment.M))
         # K RT
+        # U_2 = np.random.uniform(self.Experiment.min_perm_RT+0.005e-11,
+        #                         self.Experiment.max_perm_RT-0.005e-8,
+        #                         (self.n_ensemble,self.Experiment.M_RT))
+        
         U_2 = np.random.uniform(self.Experiment.min_perm_RT+0.005e-11,
-                                self.Experiment.max_perm_RT-0.005e-8,
+                                self.Experiment.max_perm_RT-300*10**(-10),
                                 (self.n_ensemble,self.Experiment.M_RT))
+
         
         if not ensemble_dependence:
         
@@ -214,7 +222,9 @@ class EKI:
                               self.Experiment.max_poro_RT-0.0005)
 
 
-        U = torch.tensor(np.hstack( (U_1,U_2,U_3,U_4) )).float().to(self.device)
+        # U = torch.tensor(np.hstack( (U_1,U_2,U_3,U_4) )).float().to(self.device)
+        U = torch.tensor(np.hstack( (U_1,U_2,U_3) )).float().to(self.device)
+
         U = self._ParameteriseXTensor(U,"FWD").T # Parameterise and tensorise
         return U
      
@@ -310,7 +320,7 @@ class EKI:
 
             t_vec.append(t_vec[iterate] + 1/alpha)
             ensemble_iter.append(U)
-            #print(t[iterate])
+            print(misfit_vec)
               
         return U, t_vec, misfit_vec, ensemble_iter
     
@@ -330,6 +340,7 @@ class EKI:
             print("t = " + str(self.t) + ": " + "EKI completed in " + str(time_diff) + "s.")
             # Plot (not included in EKI time).
             if plotting:
+                print('here')
                 self.diagnostic_check(U_plotting)
             return U_plotting, EKI_times, len(U_posterior[2])
         
@@ -361,7 +372,8 @@ class EKI:
     # Boxplot of posteriors. Better for visualising uncertainty intervals
     def diagnostic_check(self,U):
 
-        halfway = int(len(U[0])/2) # Length 85
+        # halfway = int(len(U[0])/2) # Length 85
+        halfway = 49
         
         plt.figure(figsize=(12,4),dpi=130)
         
@@ -382,8 +394,9 @@ class EKI:
         plt.boxplot(U[:,halfway:],showfliers=False)
         
         # Plot u_true if known (i.e. if virtual experiment)
+        print(self.u_true)
         if self.u_true is not None:
-            plt.scatter(list(range(1,halfway+1)),self.u_true[halfway:],s=14,color="red")
+            plt.scatter(list(range(1,18)),self.u_true[halfway:],s=14,color="red")
         plt.ylim([0,1])
         plt.xticks(rotation = 90)
         

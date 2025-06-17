@@ -41,8 +41,8 @@ Exp = Experiment()
 # Read in data 
 # X has 71 columns (49 permeability values, 17 porosity values, 4 p_I, 1 \mu)
 # Y has 300 coloumns (20 sensor locs with 15 observation times)
-X, Y = read_txt(r"Data\Inputs.txt"), read_txt(r"Data\Outputs.txt")
-# X, Y = read_txt(r"Data\Inputs_surrogate_1.txt"), read_txt(r"Data\Outputs_surrogate_1.txt")
+X, Y = read_txt(r"Data\Inputs_15obs.txt"), read_txt(r"Data\Outputs_15obs.txt")
+# X, Y = read_txt(r"Data\Inputs.txt"), read_txt(r"Data\Outputs.txt")
 filling_times = read_txt(r"Data\filling_times.txt")
 # Data object holds data and useful data-related functions
 Dat = Data(Exp,X,Y,filling_times)
@@ -58,11 +58,11 @@ NN = NeuralNetwork(Data = Dat,
                    activation = "Sigmoid",
                    epochs = 5000, 
                    learning_rate = 0.001,
-                   batch_size = 128,
+                   batch_size = 256,
                    plotting = 1)
 NN.train_nn()
+NN.assess_training(n = 10)
 NN.assess_surrogate(n = 10)
-
 ###############################################################################
 ####################     Visual surrogate error    ############################
 ###############################################################################
@@ -208,14 +208,23 @@ plt.show()
 # Test surrogate evaluation time
 # %timeit NN.F(Dat.DevelopX[0])
 
-# Set various inversion times
-number_of_obs_time = 15
-all_times = list(range(1,number_of_obs_time+1))
+# # Set various inversion times
+# number_of_obs_time = 15
+# all_times = list(range(1,number_of_obs_time+1))
+number_of_obs_time = 7
+all_times = [0, 1, 2, 3, 4, 5, 6]
 
 # Generate data for test row i
-i = 5
+i = 13
 x_i = Dat.UnitTransformX(Dat.TestX, "BWD")[i]
 y_i = Dat.ParameteriseY(Dat.TestY,"BWD")[i]
+
+# Put lab data
+i = 1
+x_i = Dat.UnitTransformX(Dat.TestX, "BWD")[i]
+x_i[-5:] = np.array([90000, 90000, 90000, 90000, 0.1088], dtype=np.float64)
+y_i = read_txt(r"Data\Lab\processed_output.txt")
+
 
 # Create data
 data_obj_virt = Dat.generate_data(y_i,
@@ -226,7 +235,7 @@ data_obj_virt = Dat.generate_data(y_i,
 # Create EKI object
 eki = EKI(Experiment = Exp, Data = Dat, NeuralNetwork = NN,
           Data_obj = data_obj_virt, t = all_times,
-          n_ensemble = 10_000, iter_max = 100,
+          n_ensemble = 10_000, iter_max = 50,
           p_I = x_i[-5:-1], mu = x_i[-1],
           u_true = x_i[:len(x_i)-5])
 
@@ -234,6 +243,12 @@ eki = EKI(Experiment = Exp, Data = Dat, NeuralNetwork = NN,
 posterior_ensemble = eki.run_EKI(plotting = False,ensemble_dep=0)
 eki.diagnostic_check(posterior_ensemble[0][-1])
 
+# Calculated the average of the posterior ensemble
+posterior_properties = np.mean(posterior_ensemble[0][-1], axis=0)
+# Convert permeability to viscous resistance
+posterior_properties[:49]=1/posterior_properties[:49]
+# save it to txt
+np.savetxt(r"Data\Lab\posterior_properties_300s.txt", [posterior_properties], delimiter=',')
 
 
 ###############################################################################
